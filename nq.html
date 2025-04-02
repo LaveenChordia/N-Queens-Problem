@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Queens Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .solutions {
+            margin-top: 20px;
+        }
+        .board {
+            display: grid;
+            margin: 20px auto;
+            gap: 2px;
+            border: 2px solid #333;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+        .queen {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <h1>N-Queens Solver</h1>
+    <div>
+        <label for="size">Enter the value of N:</label>
+        <input type="number" id="size" min="4" placeholder="4 or more">
+        <button onclick="solveNQueens()">Solve</button>
+    </div>
+    <p id="error" class="error"></p>
+    <div id="solutions" class="solutions"></div>
+    <script>
+        function solveNQueens() {
+            const n = parseInt(document.getElementById("size").value);
+            const error = document.getElementById("error");
+            const solutionsDiv = document.getElementById("solutions");
+
+            if (isNaN(n) || n < 4) {
+                error.textContent = "Please enter a valid number (4 or more).";
+                solutionsDiv.innerHTML = "";
+                return;
+            }
+
+            error.textContent = "";
+            solutionsDiv.innerHTML = "";
+            const solutions = [];
+            const board = Array.from({ length: n }, () => Array(n).fill(0));
+
+            function isSafe(board, row, col) {
+                for (let i = 0; i < col; i++) {
+                    if (board[row][i] === 1) return false;
+                }
+                for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+                    if (board[i][j] === 1) return false;
+                }
+                for (let i = row, j = col; i < n && j >= 0; i++, j--) {
+                    if (board[i][j] === 1) return false;
+                }
+                return true;
+            }
+
+            function solve(board, col) {
+                if (col >= n) {
+                    solutions.push(board.map(row => [...row]));
+                    return;
+                }
+                for (let i = 0; i < n; i++) {
+                    if (isSafe(board, i, col)) {
+                        board[i][col] = 1;
+                        solve(board, col + 1);
+                        board[i][col] = 0;
+                    }
+                }
+            }
+
+            solve(board, 0);
+
+            if (solutions.length === 0) {
+                solutionsDiv.innerHTML = "<p>No solutions found.</p>";
+                return;
+            }
+
+            solutions.forEach((solution, index) => {
+                const solutionDiv = document.createElement("div");
+                const boardDiv = document.createElement("div");
+                boardDiv.className = "board";
+                boardDiv.style.gridTemplateColumns = `repeat(${n}, 40px)`;
+
+                solution.forEach(row => {
+                    row.forEach(cell => {
+                        const cellDiv = document.createElement("div");
+                        cellDiv.className = "cell";
+                        if (cell === 1) {
+                            const queenDiv = document.createElement("div");
+                            queenDiv.className = "queen";
+                            queenDiv.textContent = "Q";
+                            cellDiv.appendChild(queenDiv);
+                        }
+                        boardDiv.appendChild(cellDiv);
+                    });
+                });
+
+                solutionDiv.innerHTML = `<h3>Solution ${index + 1}</h3>`;
+                solutionDiv.appendChild(boardDiv);
+                solutionsDiv.appendChild(solutionDiv);
+            });
+        }
+    </script>
+</body>
+</html>
